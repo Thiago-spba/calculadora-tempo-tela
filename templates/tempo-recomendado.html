@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempo Recomendado | Tempo de Tela</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <header class="text-center py-4 header-gradient">
+        <div class="container">
+            <h1 class="display-5 fw-bold text-white"><i class="fas fa-check-circle me-2"></i>Tempo Recomendado</h1>
+            <p class="lead text-white">Diretrizes oficiais da OMS e especialistas</p>
+        </div>
+    </header>
+
+    <main class="container my-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <a href="/" class="btn btn-outline-primary mb-4"><i class="fas fa-arrow-left me-2"></i>Voltar</a>
+
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4"><i class="fas fa-heartbeat text-success me-2"></i>Diretrizes por
+                            Faixa Etária</h3>
+
+                        <div class="recomendacao-item mb-4 p-3 bg-light rounded">
+                            <h5><i class="fas fa-baby text-info me-2"></i>0-2 anos</h5>
+                            <p class="mb-2"><strong>Recomendação OMS:</strong> <span class="badge bg-danger">0
+                                    horas</span></p>
+                            <p class="mb-0">Evitar completamente o uso de telas. Priorizar interação humana,
+                                brincadeiras físicas e exploração do ambiente.</p>
+                        </div>
+
+                        <div class="recomendacao-item mb-4 p-3 bg-light rounded">
+                            <h5><i class="fas fa-child text-primary me-2"></i>3-5 anos</h5>
+                            <p class="mb-2"><strong>Recomendação OMS:</strong> <span
+                                    class="badge bg-warning text-dark">Máximo 1h/dia</span></p>
+                            <p class="mb-0">Limitar a conteúdos educativos de qualidade. Supervisão parental
+                                obrigatória. Menos tempo é sempre melhor.</p>
+                        </div>
+
+                        <div class="recomendacao-item mb-4 p-3 bg-light rounded">
+                            <h5><i class="fas fa-user-graduate text-success me-2"></i>6-12 anos</h5>
+                            <p class="mb-2"><strong>Recomendação Academia Americana de Pediatria:</strong> <span
+                                    class="badge bg-warning text-dark">1-2h/dia</span></p>
+                            <p class="mb-0">Estabelecer limites claros. Priorizar atividades físicas, leitura e convívio
+                                social presencial.</p>
+                        </div>
+
+                        <div class="recomendacao-item mb-4 p-3 bg-light rounded">
+                            <h5><i class="fas fa-user text-warning me-2"></i>13-18 anos</h5>
+                            <p class="mb-2"><strong>Recomendação:</strong> <span
+                                    class="badge bg-warning text-dark">2h/dia (lazer)</span></p>
+                            <p class="mb-0">Excluindo uso educacional. Monitorar sinais de dependência digital.
+                                Incentivar hobbies offline.</p>
+                        </div>
+
+                        <div class="recomendacao-item mb-4 p-3 bg-light rounded">
+                            <h5><i class="fas fa-user-tie text-primary me-2"></i>Adultos (19+ anos)</h5>
+                            <p class="mb-2"><strong>Recomendação:</strong> <span class="badge bg-success">Equilíbrio
+                                    consciente</span></p>
+                            <p class="mb-0">Limitar lazer a 2-4h/dia. Fazer pausas regulares no trabalho digital.
+                                Priorizar sono adequado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4"><i class="fas fa-shield-alt text-primary me-2"></i>Regras de Ouro
+                        </h3>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded">
+                                    <h6><i class="fas fa-moon text-warning me-2"></i>1h Antes de Dormir</h6>
+                                    <p class="small mb-0">Zero telas para melhor qualidade do sono</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded">
+                                    <h6><i class="fas fa-utensils text-danger me-2"></i>Refeições</h6>
+                                    <p class="small mb-0">Sem dispositivos durante as refeições</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded">
+                                    <h6><i class="fas fa-bed text-info me-2"></i>Quartos</h6>
+                                    <p class="small mb-0">Manter zona livre de telas</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded">
+                                    <h6><i class="fas fa-running text-success me-2"></i>Atividade Física</h6>
+                                    <p class="small mb-0">Priorizar movimento sobre telas</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-lg mb-4 bg-success text-white">
+                    <div class="card-body p-4">
+                        <h4 class="text-center mb-3"><i class="fas fa-trophy me-2"></i>Seu Uso Está Saudável?</h4>
+                        <p class="text-center mb-0">Use nossa calculadora para descobrir se seu tempo de tela está
+                            dentro dos padrões recomendados!</p>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <a href="/" class="btn btn-primary btn-lg"><i class="fas fa-calculator me-2"></i>Calcular Meu
+                        Tempo</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 mt-5 border-top">
+        <p class="mb-0">Projeto de Extensão "Tempo de Tela: Consciência Digital"</p>
+    </footer>
+</body>
+
+</html>

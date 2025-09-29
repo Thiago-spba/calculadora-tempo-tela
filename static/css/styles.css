@@ -1,0 +1,373 @@
+/* VARIÁVEIS DE COR */
+:root {
+    --cor-fundo: #f8f9fa;
+    --cor-card: #ffffff;
+    --cor-primaria: #007BFF;
+    --cor-texto: #212529;
+    --cor-texto-muted: #6c757d;
+    --cor-borda: #dee2e6;
+    --cor-success: #28a745;
+    --cor-warning: #ffc107;
+    --cor-danger: #dc3545;
+    --cor-critical: #6f42c1;
+}
+
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+}
+
+/* HEADER COM GRADIENTE ANIMADO */
+.header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-gradient::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+header h1, header .lead {
+    color: white !important;
+    position: relative;
+    z-index: 1;
+}
+
+/* ANIMAÇÕES DE ENTRADA */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animate-fade-in-delay {
+    animation: fadeIn 0.6s ease-out 0.3s both;
+}
+
+/* CARDS COM HOVER E ANIMAÇÃO */
+.card {
+    background-color: var(--cor-card);
+    border: 1px solid var(--cor-borda);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-scale {
+    animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* MELHORIAS DO CARD CALCULADORA */
+#calculadora {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: none;
+    border-top: 5px solid var(--cor-primaria);
+}
+
+/* Estilo dos inputs com ícones */
+.input-group-text {
+    border: none;
+    font-size: 1.2rem;
+}
+
+.input-group .form-control {
+    border-left: none;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.input-group .form-control:focus {
+    border-color: #ced4da;
+    box-shadow: none;
+}
+
+/* Botão com gradiente animado */
+.btn-gradiente {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-gradiente::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-gradiente:hover::before {
+    left: 100%;
+}
+
+.btn-gradiente:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Preview do total */
+#total-preview {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--cor-primaria);
+    display: inline-block;
+    padding: 8px 16px;
+    background: rgba(0, 123, 255, 0.1);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+#total-preview.active {
+    background: rgba(0, 123, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Animação nos labels */
+.form-label {
+    transition: all 0.3s ease;
+}
+
+/* Remove setas dos inputs number */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 40px;
+}
+
+/* INPUT COM ANIMAÇÃO DE PULSO SUAVE */
+.form-control {
+    background-color: #fff;
+    color: var(--cor-texto);
+    border: 2px solid var(--cor-borda);
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+    transform: scale(1.02);
+}
+
+/* BOTÃO COM EFEITO */
+.btn-primary {
+    background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+    border: none;
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 123, 255, 0.4);
+}
+
+.btn-pulse {
+    animation: btnPulse 2s infinite;
+}
+
+@keyframes btnPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* CARDS DE CLASSIFICAÇÃO */
+#card-classificacao {
+    border: none;
+    background: linear-gradient(135deg, var(--cor-primaria) 0%, #0056b3 100%);
+    animation: pulse-bg 2s infinite;
+}
+
+@keyframes pulse-bg {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+    50% { box-shadow: 0 0 20px 10px rgba(0, 123, 255, 0); }
+}
+
+.bg-success { 
+    background: linear-gradient(135deg, var(--cor-success) 0%, #1e7e34 100%) !important; 
+}
+
+.bg-warning { 
+    background: linear-gradient(135deg, var(--cor-warning) 0%, #e0a800 100%) !important;
+    color: var(--cor-texto) !important;
+}
+
+.bg-danger { 
+    background: linear-gradient(135deg, var(--cor-danger) 0%, #c82333 100%) !important; 
+}
+
+.bg-critical { 
+    background: linear-gradient(135deg, var(--cor-critical) 0%, #5a32a3 100%) !important; 
+}
+
+/* ANIMAÇÃO DE CONTAGEM */
+.contador-animado {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+}
+
+/* MENSAGEM PERSONALIZADA */
+.slide-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* GRÁFICOS */
+#grafico-rotina, #grafico-comparacao {
+    max-height: 300px;
+    margin: 0 auto;
+}
+
+/* SEÇÃO EDUCATIVA */
+#educativo {
+    background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+    border-radius: 1rem;
+}
+
+#educativo h5 {
+    color: var(--cor-primaria);
+}
+
+#educativo .fa-4x {
+    transition: transform 0.3s ease;
+}
+
+#educativo .card:hover .fa-4x {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* ANIMAÇÃO DO CÉREBRO */
+#animacao-cerebro {
+    height: 120px;
+    margin: 0 auto;
+}
+
+/* FOOTER */
+footer {
+    color: var(--cor-texto-muted);
+    border-top: 1px solid var(--cor-borda) !important;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.badge-pulse {
+    animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .form-control, .btn {
+        font-size: 1rem;
+    }
+
+    #calculator-form {
+        flex-direction: column;
+    }
+
+    #calculator-form > div {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    #grafico-rotina, #grafico-comparacao {
+        max-height: 250px;
+    }
+
+    .display-6 {
+        font-size: 1.5rem;
+    }
+    
+    .input-group .form-control {
+        font-size: 1.1rem;
+    }
+    
+    #total-preview {
+        font-size: 0.9rem;
+    }
+}
+
+/* ÍCONES */
+.fa-calculator, .fa-chart-line, .fa-poll, .fa-info-circle,
+.fa-signal, .fa-clock, .fa-calendar-alt, .fa-calendar,
+.fa-hourglass-half, .fa-chart-bar, .fa-lightbulb,
+.fa-brain, .fa-heartbeat, .fa-magic, .fa-graduation-cap, .fa-users {
+    transition: transform 0.3s ease;
+}
+
+.card:hover i {
+    transform: scale(1.2);
+}
+
+/* EFEITO DE BRILHO NOS NÚMEROS */
+.contador-animado {
+    text-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+}
