@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 from datetime import datetime
 
@@ -145,6 +145,11 @@ def calcular():
             'sucesso': False,
             'mensagem': f'Erro interno: {str(e)}'
         })
+
+@app.route('/robots.txt')
+def robots():
+    """Serve o arquivo robots.txt"""
+    return send_from_directory(app.root_path, 'robots.txt')
 
 @app.route('/manifest.json')
 def manifest():
