@@ -301,8 +301,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            const texto = `⏰ Uso ${dadosResultado.horasDia}h de tela por dia!\n📊 Classificação: ${dadosResultado.classificacao}\n📱 Isso equivale a ${dadosResultado.diasPerdidos} dias por ano!\n\n🔗 Faça seu teste também:`;
-            const url = window.location.href;
+const classificacaoEmoji = {
+    'Normal': '✅',
+    'Moderado': '⚠️',
+    'Alto': '🚨',
+    'Excessivo': '❌'
+};
+
+const emoji = classificacaoEmoji[dadosResultado.classificacao] || '📊';
+
+const texto = `${emoji} MEU TEMPO DE TELA
+
+⏰ ${dadosResultado.horasDia}h por dia
+📊 ${dadosResultado.classificacao}
+📅 ${dadosResultado.diasPerdidos} dias perdidos/ano
+
+Descubra o seu:`;            const url = window.location.href;
             const textoCompleto = `${texto} ${url}`;
 
             if (navigator.share) {
