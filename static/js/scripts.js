@@ -1,6 +1,6 @@
 // ============================================
-// CALCULADORA DE TEMPO DE TELA - VERSÃO COMPLETA
-// Versão: 2.1 (Anti-Intermitência + Todas Funcionalidades)
+// CALCULADORA DE TEMPO DE TELA - VERSÃO FINAL
+// Com: Anti-Intermitência + Badges + Confetes + Download
 // ============================================
 
 let graficoRotina = null;
@@ -38,12 +38,162 @@ function aguardarChartJS() {
 }
 
 // ============================================
+// NOVA FUNÇÃO: ANIMAÇÃO DE CONFETES (SUCESSO)
+// ============================================
+function celebrarSucesso() {
+    // Verifica se a biblioteca confetti está disponível
+    if (typeof confetti === 'undefined') {
+        console.warn('⚠️ Biblioteca confetti não carregada');
+        return;
+    }
+
+    // Confetes do centro
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+    
+    // Confetes dos lados após 200ms
+    setTimeout(() => {
+        confetti({
+            particleCount: 50,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 }
+        });
+        confetti({
+            particleCount: 50,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 }
+        });
+    }, 200);
+}
+
+// ============================================
+// NOVA FUNÇÃO: ANIMAÇÃO DE SHAKE (ALERTA)
+// ============================================
+function alertaShake() {
+    const resultadosSection = document.getElementById('resultados');
+    if (resultadosSection) {
+        resultadosSection.classList.add('shake');
+        
+        setTimeout(() => {
+            resultadosSection.classList.remove('shake');
+        }, 600);
+    }
+}
+
+// ============================================
+// NOVA FUNÇÃO: CRIAR BADGE DE CONQUISTA
+// ============================================
+function criarBadgeConquista(classificacao, horasDia, mediaBrasil) {
+    let emoji, texto, classe;
+    
+    if (classificacao === 'Normal') {
+        emoji = '🏆';
+        texto = 'Parabéns! Seu uso está equilibrado!';
+        classe = 'sucesso';
+        celebrarSucesso();
+    } else if (classificacao === 'Moderado') {
+        emoji = '⚠️';
+        const reducao = (horasDia - 2).toFixed(1);
+        texto = `Atenção! Tente reduzir ${reducao}h para melhorar`;
+        classe = 'moderado';
+    } else if (classificacao === 'Alto') {
+        emoji = '🚨';
+        const reducao = (horasDia - 2).toFixed(1);
+        texto = `Alerta! Reduza ${reducao}h para um uso saudável`;
+        classe = 'alerta';
+        alertaShake();
+    } else { // Excessivo
+        emoji = '❌';
+        const reducao = (horasDia - 2).toFixed(1);
+        texto = `Crítico! Reduza urgentemente ${reducao}h`;
+        classe = 'alerta';
+        alertaShake();
+    }
+    
+    // Adicionar comparação com média
+    let comparacao = '';
+    if (horasDia > mediaBrasil) {
+        const diferenca = (horasDia - mediaBrasil).toFixed(1);
+        comparacao = `Você está ${diferenca}h acima da média brasileira.`;
+    } else {
+        comparacao = 'Você está abaixo da média brasileira! 👏';
+    }
+    
+    return `
+        <div class="badge-conquista ${classe}">
+            <span class="emoji">${emoji}</span>
+            <div>${texto}</div>
+            <small style="font-size: 0.85rem; opacity: 0.9; margin-top: 8px; display: block;">
+                ${comparacao}
+            </small>
+        </div>
+    `;
+}
+
+// ============================================
+// NOVA FUNÇÃO: DOWNLOAD DO RESULTADO COMO IMAGEM
+// ============================================
+async function baixarResultado() {
+    const btn = document.getElementById('btn-baixar-resultado');
+    
+    if (!btn) {
+        console.error('❌ Botão de download não encontrado');
+        return;
+    }
+
+    // Verifica se html2canvas está disponível
+    if (typeof html2canvas === 'undefined') {
+        alert('Erro: Biblioteca de captura de tela não carregada. Recarregue a página.');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gerando...';
+    
+    try {
+        const resultadosSection = document.getElementById('resultados');
+        
+        // Configurações do html2canvas
+        const canvas = await html2canvas(resultadosSection, {
+            backgroundColor: '#f8f9fa',
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            allowTaint: true
+        });
+        
+        // Converter para imagem e fazer download
+        const link = document.createElement('a');
+        link.download = `meu-tempo-de-tela-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // Feedback visual
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Baixado!';
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-download me-2"></i>Baixar Resultado';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erro ao gerar imagem:', error);
+        alert('Erro ao gerar imagem. Tente novamente.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-download me-2"></i>Baixar Resultado';
+    }
+}
+
+// ============================================
 // FUNÇÃO: CRIAR GRÁFICOS (COM RETRY)
 // ============================================
 async function criarGraficos(data) {
     console.log('🎨 Iniciando criação de gráficos...');
     
-    // Aguardar Chart.js estar disponível
     const chartDisponivel = await aguardarChartJS();
     
     if (!chartDisponivel) {
@@ -71,15 +221,9 @@ async function criarGraficos(data) {
     }
 
     try {
-        // Destruir gráficos anteriores
-        if (graficoRotina) {
-            graficoRotina.destroy();
-        }
-        if (graficoComparacao) {
-            graficoComparacao.destroy();
-        }
+        if (graficoRotina) graficoRotina.destroy();
+        if (graficoComparacao) graficoComparacao.destroy();
 
-        // DADOS BASEADOS EM ESTUDOS (OMS e pesquisas)
         const horasSono = 8;
         const horasTela = data.horasDia;
         const horasTrabalhoEstudo = 8;
@@ -87,9 +231,7 @@ async function criarGraficos(data) {
         const horasDeslocamento = 1.5;
         const horasLazerOutros = 24 - horasSono - horasTela - horasTrabalhoEstudo - horasRefeicoes - horasDeslocamento;
 
-        // ==========================================
-        // GRÁFICO DE PIZZA - DISTRIBUIÇÃO DO DIA
-        // ==========================================
+        // GRÁFICO DE PIZZA
         const ctx = canvasRotina.getContext('2d');
         
         graficoRotina = new Chart(ctx, {
@@ -188,9 +330,7 @@ async function criarGraficos(data) {
             }
         });
 
-        // ==========================================
-        // GRÁFICO DE BARRAS - COMPARAÇÃO DETALHADA
-        // ==========================================
+        // GRÁFICO DE BARRAS
         const ctxComparacao = canvasComparacao.getContext('2d');
         
         const mediaGlobal = 6.9;
@@ -345,7 +485,7 @@ async function criarGraficos(data) {
 // FUNÇÃO: MOSTRAR ERRO DOS GRÁFICOS
 // ============================================
 function mostrarErroGraficos() {
-    const graficosContainer = document.querySelector('.row.mb-4');
+    const graficosContainer = document.querySelector('.row.g-4');
     if (graficosContainer) {
         const alerta = document.createElement('div');
         alerta.className = 'alert alert-warning text-center mt-3';
@@ -366,10 +506,8 @@ function mostrarErroGraficos() {
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('📄 DOM carregado - Aguardando Chart.js...');
     
-    // Aguardar Chart.js carregar
     await aguardarChartJS();
 
-    // --- PREVIEW EM TEMPO REAL DO TOTAL DE HORAS ---
     const inputHoras = document.getElementById('horas');
     const inputMinutos = document.getElementById('minutos');
     const totalPreview = document.getElementById('total-preview');
@@ -393,7 +531,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         inputMinutos.addEventListener('input', atualizarPreview);
     }
 
-    // --- CARREGAMENTO DA ANIMAÇÃO LOTTIE ---
     const animacaoContainer = document.getElementById('animacao-cerebro');
     if (animacaoContainer) {
         const player = document.createElement('lottie-player');
@@ -407,7 +544,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         animacaoContainer.appendChild(player);
     }
 
-    // --- FUNÇÃO DE ANIMAÇÃO DE CONTAGEM ---
     function animarContagem(elemento, valorFinal, duracao = 1500) {
         const valorInicial = 0;
         const incremento = valorFinal / (duracao / 16);
@@ -424,33 +560,24 @@ document.addEventListener('DOMContentLoaded', async function() {
         }, 16);
     }
 
-    // --- LÓGICA DA CALCULADORA ---
     const form = document.getElementById('calculator-form');
     const resultadosSection = document.getElementById('resultados');
 
     if (!form) return;
 
-    // --- RECUPERA DADOS SALVOS AO CARREGAR A PÁGINA ---
     const dadosSalvos = localStorage.getItem('dadosCalculadora');
     if (dadosSalvos) {
         try {
             const dados = JSON.parse(dadosSalvos);
-            if (dados.horas !== undefined) {
-                inputHoras.value = dados.horas;
-            }
-            if (dados.minutos !== undefined) {
-                inputMinutos.value = dados.minutos;
-            }
-            if (dados.resultado) {
-                exibirResultadosSalvos(dados.resultado);
-            }
+            if (dados.horas !== undefined) inputHoras.value = dados.horas;
+            if (dados.minutos !== undefined) inputMinutos.value = dados.minutos;
+            if (dados.resultado) exibirResultadosSalvos(dados.resultado);
             atualizarPreview();
         } catch (e) {
             console.error('Erro ao recuperar dados:', e);
         }
     }
 
-    // --- FUNÇÃO PARA EXIBIR RESULTADOS SALVOS ---
     function exibirResultadosSalvos(data) {
         dadosResultado = data;
         
@@ -466,11 +593,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         cardClassificacao.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-critical');
         cardClassificacao.classList.add(`bg-${data.corAlerta}`);
 
+        // NOVO: Criar badge de conquista
+        const badgeContainer = document.getElementById('badge-conquista-container');
+        if (badgeContainer) {
+            badgeContainer.innerHTML = criarBadgeConquista(data.classificacao, data.horasDia, 9.4);
+        }
+
         criarGraficos(data);
         resultadosSection.classList.remove('d-none');
     }
 
-    // --- SUBMIT DO FORMULÁRIO ---
     form.addEventListener('submit', function(event) {
         event.preventDefault();
         const formData = new FormData(form);
@@ -504,6 +636,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 cardClassificacao.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-critical');
                 cardClassificacao.classList.add(`bg-${data.corAlerta}`);
 
+                // NOVO: Criar badge de conquista
+                const badgeContainer = document.getElementById('badge-conquista-container');
+                if (badgeContainer) {
+                    badgeContainer.innerHTML = criarBadgeConquista(data.classificacao, data.horasDia, 9.4);
+                }
+
                 criarGraficos(data);
                 resultadosSection.classList.remove('d-none');
                 resultadosSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -517,7 +655,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    // --- COMPARTILHAMENTO ---
+    // COMPARTILHAMENTO
     const btnCompartilhar = document.getElementById('btn-compartilhar');
     if (btnCompartilhar) {
         btnCompartilhar.addEventListener('click', function() {
@@ -555,6 +693,12 @@ Descubra o seu:`;
         });
     }
 
+    // NOVO: BOTÃO DE DOWNLOAD
+    const btnBaixar = document.getElementById('btn-baixar-resultado');
+    if (btnBaixar) {
+        btnBaixar.addEventListener('click', baixarResultado);
+    }
+
     function compartilharFallback(texto) {
         const modal = document.createElement('div');
         modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
@@ -581,7 +725,7 @@ Descubra o seu:`;
         document.body.appendChild(modal);
     }
 
-    // --- RESPONSIVIDADE ---
+    // RESPONSIVIDADE
     let resizeTimer;
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimer);
@@ -593,4 +737,4 @@ Descubra o seu:`;
     });
 });
 
-console.log('✅ Script carregado - Versão Completa Anti-Intermitência');
+console.log('✅ Script carregado - Versão Final com Badges, Confetes e Download');

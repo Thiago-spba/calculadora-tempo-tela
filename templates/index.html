@@ -129,10 +129,16 @@
                 <strong id="texto-mensagem"></strong>
             </div>
 
-            <!-- Botão Compartilhar -->
-            <div class="text-center mb-4">
+            <!-- NOVO: Badge de Conquista (será preenchido via JavaScript) -->
+            <div id="badge-conquista-container" class="text-center mb-4"></div>
+
+            <!-- NOVO: Botões de Ação (Compartilhar + Baixar) -->
+            <div class="acoes-resultado mb-4">
                 <button id="btn-compartilhar" class="btn btn-success btn-lg">
                     <i class="fas fa-share-alt me-2"></i>Compartilhar Resultado
+                </button>
+                <button id="btn-baixar-resultado" class="btn-download">
+                    <i class="fas fa-download me-2"></i>Baixar Resultado
                 </button>
             </div>
 
@@ -270,6 +276,11 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- NOVO: Bibliotecas para Confetes e Download de Imagem -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
     <!-- Registrar Service Worker -->
