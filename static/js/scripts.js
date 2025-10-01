@@ -1,128 +1,97 @@
-document.addEventListener('DOMContentLoaded', function() {
+// ============================================
+// CALCULADORA DE TEMPO DE TELA - VERSÃO COMPLETA
+// Versão: 2.1 (Anti-Intermitência + Todas Funcionalidades)
+// ============================================
 
-    // --- PREVIEW EM TEMPO REAL DO TOTAL DE HORAS ---
-    const inputHoras = document.getElementById('horas');
-    const inputMinutos = document.getElementById('minutos');
-    const totalPreview = document.getElementById('total-preview');
+let graficoRotina = null;
+let graficoComparacao = null;
+let dadosResultado = null;
+let tentativasGrafico = 0;
+const MAX_TENTATIVAS = 5;
 
-    function atualizarPreview() {
-        const horas = parseInt(inputHoras.value) || 0;
-        const minutos = parseInt(inputMinutos.value) || 0;
+// ============================================
+// FUNÇÃO: AGUARDAR CHART.JS CARREGAR
+// ============================================
+function aguardarChartJS() {
+    return new Promise((resolve) => {
+        if (typeof Chart !== 'undefined') {
+            console.log('✅ Chart.js já carregado');
+            resolve(true);
+            return;
+        }
+
+        let tentativas = 0;
+        const intervalo = setInterval(() => {
+            tentativas++;
+            
+            if (typeof Chart !== 'undefined') {
+                console.log('✅ Chart.js carregado após', tentativas * 200, 'ms');
+                clearInterval(intervalo);
+                resolve(true);
+            } else if (tentativas >= 50) {
+                console.error('❌ Timeout: Chart.js não carregou');
+                clearInterval(intervalo);
+                resolve(false);
+            }
+        }, 200);
+    });
+}
+
+// ============================================
+// FUNÇÃO: CRIAR GRÁFICOS (COM RETRY)
+// ============================================
+async function criarGraficos(data) {
+    console.log('🎨 Iniciando criação de gráficos...');
+    
+    // Aguardar Chart.js estar disponível
+    const chartDisponivel = await aguardarChartJS();
+    
+    if (!chartDisponivel) {
+        console.error('❌ Chart.js não está disponível');
+        mostrarErroGraficos();
+        return;
+    }
+
+    const canvasRotina = document.getElementById('grafico-rotina');
+    const canvasComparacao = document.getElementById('grafico-comparacao');
+    
+    if (!canvasRotina || !canvasComparacao) {
+        console.error('❌ Canvas não encontrados');
         
-        if (horas === 0 && minutos === 0) {
-            totalPreview.textContent = 'Digite os valores para ver o total';
-            totalPreview.classList.remove('active');
+        if (tentativasGrafico < MAX_TENTATIVAS) {
+            tentativasGrafico++;
+            console.log(`⏳ Tentativa ${tentativasGrafico}/${MAX_TENTATIVAS}...`);
+            setTimeout(() => criarGraficos(data), 500);
+            return;
         } else {
-            const totalHoras = horas + (minutos / 60);
-            totalPreview.textContent = `📊 Total: ${totalHoras.toFixed(1)} horas por dia`;
-            totalPreview.classList.add('active');
+            console.error('❌ Canvas não encontrados após múltiplas tentativas');
+            mostrarErroGraficos();
+            return;
         }
     }
 
-    if (inputHoras && inputMinutos) {
-        inputHoras.addEventListener('input', atualizarPreview);
-        inputMinutos.addEventListener('input', atualizarPreview);
-    }
-
-    // --- CARREGAMENTO DA ANIMAÇÃO LOTTIE ---
-    const animacaoContainer = document.getElementById('animacao-cerebro');
-    if (animacaoContainer) {
-        const player = document.createElement('lottie-player');
-        player.src = 'https://assets10.lottiefiles.com/packages/lf20_pNx6yH.json';
-        player.background = 'transparent';
-        player.speed = '1';
-        player.style.width = '100%';
-        player.style.height = '100%';
-        player.loop = true;
-        player.autoplay = true;
-        animacaoContainer.appendChild(player);
-    }
-
-    // --- FUNÇÃO DE ANIMAÇÃO DE CONTAGEM ---
-    function animarContagem(elemento, valorFinal, duracao = 1500) {
-        const valorInicial = 0;
-        const incremento = valorFinal / (duracao / 16);
-        let valorAtual = valorInicial;
-        
-        const timer = setInterval(() => {
-            valorAtual += incremento;
-            if (valorAtual >= valorFinal) {
-                elemento.textContent = Math.round(valorFinal);
-                clearInterval(timer);
-            } else {
-                elemento.textContent = Math.round(valorAtual);
-            }
-        }, 16);
-    }
-
-    // --- LÓGICA DA CALCULADORA ---
-    const form = document.getElementById('calculator-form');
-    const resultadosSection = document.getElementById('resultados');
-    let graficoRotina = null;
-    let graficoComparacao = null;
-    let dadosResultado = null;
-
-    if (!form) return;
-
-    // --- RECUPERA DADOS SALVOS AO CARREGAR A PÁGINA ---
-    const dadosSalvos = localStorage.getItem('dadosCalculadora');
-    if (dadosSalvos) {
-        try {
-            const dados = JSON.parse(dadosSalvos);
-            if (dados.horas !== undefined) {
-                inputHoras.value = dados.horas;
-            }
-            if (dados.minutos !== undefined) {
-                inputMinutos.value = dados.minutos;
-            }
-            if (dados.resultado) {
-                exibirResultadosSalvos(dados.resultado);
-            }
-            atualizarPreview();
-        } catch (e) {
-            console.error('Erro ao recuperar dados:', e);
+    try {
+        // Destruir gráficos anteriores
+        if (graficoRotina) {
+            graficoRotina.destroy();
         }
-    }
+        if (graficoComparacao) {
+            graficoComparacao.destroy();
+        }
 
-    // --- FUNÇÃO PARA EXIBIR RESULTADOS SALVOS ---
-    function exibirResultadosSalvos(data) {
-        dadosResultado = data;
-        
-        document.getElementById('texto-mensagem').textContent = data.mensagemPersonalizada;
-        document.getElementById('tempo-ano').textContent = Math.round(data.tempoAno);
-        document.getElementById('tempo-mes').textContent = Math.round(data.tempoMes);
-        document.getElementById('dias-perdidos').textContent = data.diasPerdidos;
-        document.getElementById('classificacao-valor').textContent = data.classificacao;
-        document.getElementById('emoji-comparacao').textContent = data.emojiComparacao;
-        document.getElementById('texto-comparacao').textContent = data.comparacaoTexto;
-
-        const cardClassificacao = document.getElementById('card-classificacao');
-        cardClassificacao.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-critical');
-        cardClassificacao.classList.add(`bg-${data.corAlerta}`);
-
-        criarGraficos(data);
-        resultadosSection.classList.remove('d-none');
-    }
-
-    // --- FUNÇÃO PARA CRIAR GRÁFICOS MELHORADOS ---
-    function criarGraficos(data) {
         // DADOS BASEADOS EM ESTUDOS (OMS e pesquisas)
-        const horasSono = 8; // Recomendação OMS
+        const horasSono = 8;
         const horasTela = data.horasDia;
-        const horasTrabalhoEstudo = 8; // Média brasileira
-        const horasRefeicoes = 2; // Média de tempo em refeições
-        const horasDeslocamento = 1.5; // Média urbana brasileira
+        const horasTrabalhoEstudo = 8;
+        const horasRefeicoes = 2;
+        const horasDeslocamento = 1.5;
         const horasLazerOutros = 24 - horasSono - horasTela - horasTrabalhoEstudo - horasRefeicoes - horasDeslocamento;
 
         // ==========================================
         // GRÁFICO DE PIZZA - DISTRIBUIÇÃO DO DIA
         // ==========================================
-        const ctx = document.getElementById('grafico-rotina').getContext('2d');
+        const ctx = canvasRotina.getContext('2d');
         
-        if (graficoRotina) {
-            graficoRotina.destroy();
-        }
-
         graficoRotina = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -145,12 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         horasLazerOutros > 0 ? horasLazerOutros : 0
                     ],
                     backgroundColor: [
-                        '#FF6384', // Tela - Vermelho/Rosa
-                        '#36A2EB', // Trabalho - Azul
-                        '#9966FF', // Sono - Roxo
-                        '#FF9F40', // Refeições - Laranja
-                        '#FFCD56', // Deslocamento - Amarelo
-                        '#4BC0C0'  // Lazer - Verde água
+                        '#FF6384',
+                        '#36A2EB',
+                        '#9966FF',
+                        '#FF9F40',
+                        '#FFCD56',
+                        '#4BC0C0'
                     ],
                     borderColor: '#ffffff',
                     borderWidth: 3,
@@ -193,11 +162,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const valor = context.parsed;
                                 const anoHoras = (valor * 365).toFixed(0);
                                 const dias = (valor * 365 / 24).toFixed(1);
+                                const porcentagem = ((valor / 24) * 100).toFixed(1);
                                 
-                                if (context.dataIndex === 0) { // Tempo de Tela
+                                if (context.dataIndex === 0) {
                                     return `\n📊 Anual: ${anoHoras}h (${dias} dias)\n⚠️ ${porcentagem > 20 ? 'Acima do recomendado' : 'Dentro do esperado'}`;
-                                } else if (context.dataIndex === 2) { // Sono
-                                    const porcentagem = ((valor / 24) * 100).toFixed(1);
+                                } else if (context.dataIndex === 2) {
                                     return `\n💤 Sono recomendado: 7-9h\n${valor < 7 ? '⚠️ Abaixo do recomendado' : valor > 9 ? '⚠️ Acima do recomendado' : '✅ Adequado'}`;
                                 }
                                 return `\n📅 Por ano: ${anoHoras}h (${dias} dias)`;
@@ -222,17 +191,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // ==========================================
         // GRÁFICO DE BARRAS - COMPARAÇÃO DETALHADA
         // ==========================================
-        const ctxComparacao = document.getElementById('grafico-comparacao').getContext('2d');
+        const ctxComparacao = canvasComparacao.getContext('2d');
         
-        if (graficoComparacao) {
-            graficoComparacao.destroy();
-        }
-
-        // Dados baseados em estudos reais
-        const mediaGlobal = 6.9; // Relatório Digital 2024
-        const mediaBrasil = 9.4; // Brasil lidera uso de redes sociais
-        const recomendacaoOMS = 2.0; // OMS recomenda max 2h para adultos
-        const mediaJovens = 7.2; // 16-24 anos (pesquisa TIC Kids)
+        const mediaGlobal = 6.9;
+        const mediaBrasil = 9.4;
+        const recomendacaoOMS = 2.0;
+        const mediaJovens = 7.2;
 
         graficoComparacao = new Chart(ctxComparacao, {
             type: 'bar',
@@ -248,11 +212,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         recomendacaoOMS
                     ],
                     backgroundColor: [
-                        data.horasDia > mediaBrasil ? 'rgba(255, 99, 132, 0.8)' : 'rgba(75, 192, 192, 0.8)', // Você
-                        'rgba(54, 162, 235, 0.8)', // Brasil
-                        'rgba(153, 102, 255, 0.8)', // Global
-                        'rgba(255, 206, 86, 0.8)', // Jovens
-                        'rgba(75, 192, 192, 0.8)'  // OMS
+                        data.horasDia > mediaBrasil ? 'rgba(255, 99, 132, 0.8)' : 'rgba(75, 192, 192, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)'
                     ],
                     borderColor: [
                         data.horasDia > mediaBrasil ? '#FF6384' : '#4BC0C0',
@@ -270,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                indexAxis: window.innerWidth < 768 ? 'y' : 'x', // Horizontal em mobile
+                indexAxis: window.innerWidth < 768 ? 'y' : 'x',
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -360,8 +324,153 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        console.log('✅ Gráficos criados com sucesso!');
+        tentativasGrafico = 0;
+
+    } catch (erro) {
+        console.error('❌ Erro ao criar gráficos:', erro);
+        
+        if (tentativasGrafico < MAX_TENTATIVAS) {
+            tentativasGrafico++;
+            console.log(`⏳ Nova tentativa ${tentativasGrafico}/${MAX_TENTATIVAS}...`);
+            setTimeout(() => criarGraficos(data), 1000);
+        } else {
+            mostrarErroGraficos();
+        }
+    }
+}
+
+// ============================================
+// FUNÇÃO: MOSTRAR ERRO DOS GRÁFICOS
+// ============================================
+function mostrarErroGraficos() {
+    const graficosContainer = document.querySelector('.row.mb-4');
+    if (graficosContainer) {
+        const alerta = document.createElement('div');
+        alerta.className = 'alert alert-warning text-center mt-3';
+        alerta.innerHTML = `
+            <h5>⚠️ Gráficos não carregaram</h5>
+            <p>Recarregue a página (F5) ou aguarde alguns segundos.</p>
+            <button onclick="location.reload()" class="btn btn-primary btn-sm mt-2">
+                🔄 Recarregar Página
+            </button>
+        `;
+        graficosContainer.appendChild(alerta);
+    }
+}
+
+// ============================================
+// EVENTO PRINCIPAL: DOM CARREGADO
+// ============================================
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('📄 DOM carregado - Aguardando Chart.js...');
+    
+    // Aguardar Chart.js carregar
+    await aguardarChartJS();
+
+    // --- PREVIEW EM TEMPO REAL DO TOTAL DE HORAS ---
+    const inputHoras = document.getElementById('horas');
+    const inputMinutos = document.getElementById('minutos');
+    const totalPreview = document.getElementById('total-preview');
+
+    function atualizarPreview() {
+        const horas = parseInt(inputHoras.value) || 0;
+        const minutos = parseInt(inputMinutos.value) || 0;
+        
+        if (horas === 0 && minutos === 0) {
+            totalPreview.textContent = 'Digite os valores para ver o total';
+            totalPreview.classList.remove('active');
+        } else {
+            const totalHoras = horas + (minutos / 60);
+            totalPreview.textContent = `📊 Total: ${totalHoras.toFixed(1)} horas por dia`;
+            totalPreview.classList.add('active');
+        }
     }
 
+    if (inputHoras && inputMinutos) {
+        inputHoras.addEventListener('input', atualizarPreview);
+        inputMinutos.addEventListener('input', atualizarPreview);
+    }
+
+    // --- CARREGAMENTO DA ANIMAÇÃO LOTTIE ---
+    const animacaoContainer = document.getElementById('animacao-cerebro');
+    if (animacaoContainer) {
+        const player = document.createElement('lottie-player');
+        player.src = 'https://assets10.lottiefiles.com/packages/lf20_pNx6yH.json';
+        player.background = 'transparent';
+        player.speed = '1';
+        player.style.width = '100%';
+        player.style.height = '100%';
+        player.loop = true;
+        player.autoplay = true;
+        animacaoContainer.appendChild(player);
+    }
+
+    // --- FUNÇÃO DE ANIMAÇÃO DE CONTAGEM ---
+    function animarContagem(elemento, valorFinal, duracao = 1500) {
+        const valorInicial = 0;
+        const incremento = valorFinal / (duracao / 16);
+        let valorAtual = valorInicial;
+        
+        const timer = setInterval(() => {
+            valorAtual += incremento;
+            if (valorAtual >= valorFinal) {
+                elemento.textContent = Math.round(valorFinal);
+                clearInterval(timer);
+            } else {
+                elemento.textContent = Math.round(valorAtual);
+            }
+        }, 16);
+    }
+
+    // --- LÓGICA DA CALCULADORA ---
+    const form = document.getElementById('calculator-form');
+    const resultadosSection = document.getElementById('resultados');
+
+    if (!form) return;
+
+    // --- RECUPERA DADOS SALVOS AO CARREGAR A PÁGINA ---
+    const dadosSalvos = localStorage.getItem('dadosCalculadora');
+    if (dadosSalvos) {
+        try {
+            const dados = JSON.parse(dadosSalvos);
+            if (dados.horas !== undefined) {
+                inputHoras.value = dados.horas;
+            }
+            if (dados.minutos !== undefined) {
+                inputMinutos.value = dados.minutos;
+            }
+            if (dados.resultado) {
+                exibirResultadosSalvos(dados.resultado);
+            }
+            atualizarPreview();
+        } catch (e) {
+            console.error('Erro ao recuperar dados:', e);
+        }
+    }
+
+    // --- FUNÇÃO PARA EXIBIR RESULTADOS SALVOS ---
+    function exibirResultadosSalvos(data) {
+        dadosResultado = data;
+        
+        document.getElementById('texto-mensagem').textContent = data.mensagemPersonalizada;
+        document.getElementById('tempo-ano').textContent = Math.round(data.tempoAno);
+        document.getElementById('tempo-mes').textContent = Math.round(data.tempoMes);
+        document.getElementById('dias-perdidos').textContent = data.diasPerdidos;
+        document.getElementById('classificacao-valor').textContent = data.classificacao;
+        document.getElementById('emoji-comparacao').textContent = data.emojiComparacao;
+        document.getElementById('texto-comparacao').textContent = data.comparacaoTexto;
+
+        const cardClassificacao = document.getElementById('card-classificacao');
+        cardClassificacao.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-critical');
+        cardClassificacao.classList.add(`bg-${data.corAlerta}`);
+
+        criarGraficos(data);
+        resultadosSection.classList.remove('d-none');
+    }
+
+    // --- SUBMIT DO FORMULÁRIO ---
     form.addEventListener('submit', function(event) {
         event.preventDefault();
         const formData = new FormData(form);
@@ -381,6 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('dadosCalculadora', JSON.stringify(dadosParaSalvar));
                 
                 dadosResultado = data;
+                tentativasGrafico = 0;
                 
                 document.getElementById('texto-mensagem').textContent = data.mensagemPersonalizada;
                 animarContagem(document.getElementById('tempo-ano'), data.tempoAno);
@@ -407,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // COMPARTILHAMENTO
+    // --- COMPARTILHAMENTO ---
     const btnCompartilhar = document.getElementById('btn-compartilhar');
     if (btnCompartilhar) {
         btnCompartilhar.addEventListener('click', function() {
@@ -471,14 +581,16 @@ Descubra o seu:`;
         document.body.appendChild(modal);
     }
 
-    // RESPONSIVIDADE - Atualiza gráficos ao redimensionar
+    // --- RESPONSIVIDADE ---
     let resizeTimer;
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function() {
-            if (dadosResultado) {
+            if (dadosResultado && typeof Chart !== 'undefined') {
                 criarGraficos(dadosResultado);
             }
         }, 250);
     });
 });
+
+console.log('✅ Script carregado - Versão Completa Anti-Intermitência');
